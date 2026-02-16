@@ -1,3 +1,14 @@
+"""
+Admin Panel Router.
+
+Endpoints for user management (requires admin permissions):
+- List all users
+- Get user by ID
+- Update user role
+- Activate/deactivate users
+- Delete users
+"""
+
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
@@ -9,13 +20,25 @@ from tools.auth_func import require_permission
 
 admin_router = APIRouter(prefix="/admin", tags=["Admin Panel"])
 
-@admin_router.get("/users", response_model=List[dict])
-async def get_all_users(current_user: User = Depends(require_permission("users", "read_all")), db: AsyncSession = Depends(get_db)):
-    
-    """
-    Получить список всех пользователей (требуется разрешение на чтение всех пользователей)
-    """
 
+@admin_router.get("/users", response_model=List[dict])
+async def get_all_users(
+    current_user: User = Depends(require_permission("users", "read_all")),
+    db: AsyncSession = Depends(get_db)
+):
+    """
+    Get list of all users.
+    
+    Args:
+        current_user: Authenticated user (requires 'read_all' permission for users)
+        db: Database session
+        
+    Returns:
+        List[dict]: List of all users with their details
+        
+    Raises:
+        HTTPException: 403 if user lacks 'read_all' permission
+    """
     result = await db.execute(select(User))
     users = result.scalars().all()
 
@@ -34,12 +57,26 @@ async def get_all_users(current_user: User = Depends(require_permission("users",
 
 
 @admin_router.get("/users/{user_id}", response_model=dict)
-async def get_user_by_id(user_id: int, current_user: User = Depends(require_permission("users", "read")), db: AsyncSession = Depends(get_db)):
+async def get_user_by_id(
+    user_id: int,
+    current_user: User = Depends(require_permission("users", "read")),
+    db: AsyncSession = Depends(get_db)
+):
+    """
+    Get user details by ID.
     
+    Args:
+        user_id: ID of user to retrieve
+        current_user: Authenticated user (requires 'read' permission for users)
+        db: Database session
+        
+    Returns:
+        dict: User details
+        
+    Raises:
+        HTTPException: 404 if user not found
+        HTTPException: 403 if user lacks 'read' permission
     """
-    Получить информацию о конкретном пользователе (требуется разрешение на чтение пользователей)
-    """
-
     result = await db.execute(select(User).filter(User.id == user_id))
     user = result.scalar_one_or_none()
 
@@ -61,12 +98,28 @@ async def get_user_by_id(user_id: int, current_user: User = Depends(require_perm
 
 
 @admin_router.put("/users/{user_id}/role")
-async def update_user_role(user_id: int, new_role: str, current_user: User = Depends(require_permission("users", "update")), db: AsyncSession = Depends(get_db)):
+async def update_user_role(
+    user_id: int,
+    new_role: str,
+    current_user: User = Depends(require_permission("users", "update")),
+    db: AsyncSession = Depends(get_db)
+):
+    """
+    Update user's role.
     
+    Args:
+        user_id: ID of user to update
+        new_role: New role name to assign
+        current_user: Authenticated user (requires 'update' permission for users)
+        db: Database session
+        
+    Returns:
+        dict: Success message with new role
+        
+    Raises:
+        HTTPException: 404 if user not found
+        HTTPException: 403 if user lacks 'update' permission
     """
-    Обновить роль пользователя (требуется разрешение на обновление пользователей)
-    """
-
     result = await db.execute(select(User).filter(User.id == user_id))
     user = result.scalar_one_or_none()
 
@@ -76,7 +129,7 @@ async def update_user_role(user_id: int, new_role: str, current_user: User = Dep
             detail="User not found"
         )
 
-    # Обновляем роль пользователя
+    # Update user role
     user.is_role = new_role
     await db.commit()
 
@@ -84,12 +137,26 @@ async def update_user_role(user_id: int, new_role: str, current_user: User = Dep
 
 
 @admin_router.put("/users/{user_id}/activate")
-async def activate_user(user_id: int, current_user: User = Depends(require_permission("users", "update")), db: AsyncSession = Depends(get_db)):
+async def activate_user(
+    user_id: int,
+    current_user: User = Depends(require_permission("users", "update")),
+    db: AsyncSession = Depends(get_db)
+):
+    """
+    Activate a user account.
     
+    Args:
+        user_id: ID of user to activate
+        current_user: Authenticated user (requires 'update' permission for users)
+        db: Database session
+        
+    Returns:
+        dict: Success message
+        
+    Raises:
+        HTTPException: 404 if user not found
+        HTTPException: 403 if user lacks 'update' permission
     """
-    Активировать пользователя (требуется разрешение на обновление пользователей)
-    """
-
     result = await db.execute(select(User).filter(User.id == user_id))
     user = result.scalar_one_or_none()
 
@@ -106,12 +173,27 @@ async def activate_user(user_id: int, current_user: User = Depends(require_permi
 
 
 @admin_router.put("/users/{user_id}/deactivate")
-async def deactivate_user(user_id: int, current_user: User = Depends(require_permission("users", "update")), db: AsyncSession = Depends(get_db)):
+async def deactivate_user(
+    user_id: int,
+    current_user: User = Depends(require_permission("users", "update")),
+    db: AsyncSession = Depends(get_db)
+):
+    """
+    Deactivate a user account.
     
+    Args:
+        user_id: ID of user to deactivate
+        current_user: Authenticated user (requires 'update' permission for users)
+        db: Database session
+        
+    Returns:
+        dict: Success message
+        
+    Raises:
+        HTTPException: 404 if user not found
+        HTTPException: 400 if trying to deactivate yourself
+        HTTPException: 403 if user lacks 'update' permission
     """
-    Деактивировать пользователя (требуется разрешение на обновление пользователей)
-    """
-
     result = await db.execute(select(User).filter(User.id == user_id))
     user = result.scalar_one_or_none()
 
@@ -121,7 +203,7 @@ async def deactivate_user(user_id: int, current_user: User = Depends(require_per
             detail="User not found"
         )
 
-    # Не позволяем деактивировать самого себя
+    # Prevent self-deactivation
     if user.id == current_user.id:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
@@ -135,12 +217,27 @@ async def deactivate_user(user_id: int, current_user: User = Depends(require_per
 
 
 @admin_router.delete("/users/{user_id}")
-async def delete_user(user_id: int, current_user: User = Depends(require_permission("users", "delete")), db: AsyncSession = Depends(get_db)):
-    
+async def delete_user(
+    user_id: int,
+    current_user: User = Depends(require_permission("users", "delete")),
+    db: AsyncSession = Depends(get_db)
+):
     """
-    Удалить пользователя (требуется разрешение на удаление пользователей)
-    """
+    Delete a user account.
     
+    Args:
+        user_id: ID of user to delete
+        current_user: Authenticated user (requires 'delete' permission for users)
+        db: Database session
+        
+    Returns:
+        dict: Success message
+        
+    Raises:
+        HTTPException: 404 if user not found
+        HTTPException: 400 if trying to delete yourself
+        HTTPException: 403 if user lacks 'delete' permission
+    """
     result = await db.execute(select(User).filter(User.id == user_id))
     user = result.scalar_one_or_none()
 
@@ -150,7 +247,7 @@ async def delete_user(user_id: int, current_user: User = Depends(require_permiss
             detail="User not found"
         )
 
-    # Не позволяем удалить самого себя
+    # Prevent self-deletion
     if user.id == current_user.id:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
