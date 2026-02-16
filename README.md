@@ -78,7 +78,12 @@ python reset_and_populate_test_data.py
 
 ```bash
 uvicorn main:app --reload --host 0.0.0.0 --port 8000
+
+или
+
+python -m uvicorn main:app --reload
 ```
+
 
 ### 6. Документация API
 
@@ -92,6 +97,8 @@ uvicorn main:app --reload --host 0.0.0.0 --port 8000
 
 ### Authentication (`/authentication`)
 
+<img width="1442" height="336" alt="image" src="https://github.com/user-attachments/assets/df162aa0-3433-49f4-bdca-c2ed59b55423" />
+
 | Метод | Эндпоинт | Описание |
 |-------|----------|----------|
 | POST | `/register` | Регистрация нового пользователя |
@@ -101,6 +108,8 @@ uvicorn main:app --reload --host 0.0.0.0 --port 8000
 | POST | `/cleanup-tokens` | Очистка просроченных refresh-токенов |
 
 ### Admin Panel (`/admin`)
+
+<img width="1435" height="386" alt="image" src="https://github.com/user-attachments/assets/d7b299e5-9259-472e-86d1-98855369617a" />
 
 | Метод | Эндпоинт | Описание |
 |-------|----------|----------|
@@ -113,6 +122,8 @@ uvicorn main:app --reload --host 0.0.0.0 --port 8000
 
 ### User Profile (`/profile`)
 
+<img width="1435" height="218" alt="image" src="https://github.com/user-attachments/assets/2f971111-daf6-4842-8469-9a1989c621d6" />
+
 | Метод | Эндпоинт | Описание |
 |-------|----------|----------|
 | GET | `/` | Профиль текущего пользователя |
@@ -120,6 +131,8 @@ uvicorn main:app --reload --host 0.0.0.0 --port 8000
 | PUT | `/update/{parameter}` | Обновление поля профиля |
 
 ### Permissions (`/permissions`)
+
+<img width="1435" height="331" alt="image" src="https://github.com/user-attachments/assets/c91b652c-684d-46af-951b-293ef69cdadf" />
 
 | Метод | Эндпоинт | Описание |
 |-------|----------|----------|
@@ -130,6 +143,8 @@ uvicorn main:app --reload --host 0.0.0.0 --port 8000
 | DELETE | `/{role_name}` | Удалить права (требуется `delete`) |
 
 ### Business Elements (`/business-elements`)
+
+<img width="1436" height="382" alt="image" src="https://github.com/user-attachments/assets/c1faf0ba-c538-4dd1-bf36-672a98a060c5" />
 
 | Метод | Эндпоинт | Описание |
 |-------|----------|----------|
@@ -245,40 +260,6 @@ curl -X GET http://localhost:8000/profile/ \
 | `DB_PORT` | `5432` | Порт БД |
 | `DB_NAME` | `auth_db` | Имя базы данных |
 
----
-
-## 🛡 Безопасность
-
-### Рекомендации для продакшена
-
-1. **SECRET_KEY**: сгенерируйте случайную строку (минимум 32 символа)
-   ```python
-   import secrets
-   print(secrets.token_urlsafe(32))
-   ```
-
-2. **CORS**: укажите конкретные домены в `main.py`:
-   ```python
-   allow_origins=["https://yourdomain.com"]
-   ```
-
-3. **HTTPS**: используйте только через обратный прокси (nginx, traefik)
-
-4. **Rate Limiting**: добавьте `slowapi` для защиты от brute-force
-
-5. **Миграции БД**: используйте Alembic для версионирования схем
-
----
-
-## 🧪 Тестирование
-
-```bash
-# Запуск тестов (если добавлены)
-pytest
-
-# Проверка типов (если добавлен mypy)
-mypy .
-```
 
 ---
 
