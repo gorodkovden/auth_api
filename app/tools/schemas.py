@@ -187,6 +187,7 @@ class BusinessElementCreate(BaseModel):
     """
     name: str = Field(..., min_length=1, max_length=100)
     roles: List[str] = Field(..., min_length=1)
+    description: str = Field(..., min_length=1, max_length=255)
 
 
 class BusinessElementResponse(BaseModel):
@@ -210,4 +211,7 @@ class BusinessElementObject(BaseModel):
     Attributes:
         description: Element description
     """
+    id: int
+    name: str
+    roles: str
     description: str

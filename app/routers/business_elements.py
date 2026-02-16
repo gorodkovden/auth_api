@@ -139,7 +139,7 @@ async def create_business_element(
     }
 
 
-@business_elements_router.put("/{element_name}", response_model=BusinessElementResponse)
+@business_elements_router.put("/{element_name}", response_model=BusinessElementObject)
 async def update_business_element(
     element_data: BusinessElementCreate,
     current_user: User = Depends(require_permission("business_elements", "update")),
@@ -172,13 +172,15 @@ async def update_business_element(
     # Update element fields
     element.name = element_data.name
     element.roles = element_data.roles
+    element.description = element_data.description
     await db.commit()
     await db.refresh(element)
 
     return {
         "id": element.id,
         "name": element.name,
-        "roles": element.roles
+        "roles": element.roles,
+        "description": element.description
     }
 
 
